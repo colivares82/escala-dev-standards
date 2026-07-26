@@ -1,0 +1,21 @@
+{
+  "name": "escala-dev-standards",
+  "version": "1.0.0",
+  "description": "Portable engineering standards and agent skills for the Escala stack (React + NestJS + Prisma + PostgreSQL + GCP). src/ is the canonical SKILL.md tree; dist/clinerules holds generated always-on Cline rules; escala-standards-sync installs them into consuming projects.",
+  "license": "MIT",
+  "author": "Carlos Olivares (Escala Digital Ventures, S.L.U.)",
+  "type": "module",
+  "bin": {
+    "escala-standards-sync": "scripts/sync.mjs"
+  },
+  "files": [
+    "src",
+    "dist",
+    "scripts",
+    "README.md",
+    "GUIDE.md"
+  ],
+  "scripts": {
+    "build": "bash scripts/build.sh"
+  }
+}
