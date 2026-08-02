@@ -15,7 +15,7 @@ for its own domain; otherwise this file governs.
    colors, and user-facing strings never appear inline. Backend → `.env` + `ConfigService`.
    Frontend → `config/` + `constants/` + design tokens. If a literal would change between
    environments or be reused, it is a named constant.
-2. **File-size limit.** Hard max **300 lines**, target **200–250**. When exceeded, extract:
+2. **File-size limit.** Hard max **350 lines**, target **250–290**. When exceeded, extract:
    sub-services / repositories (backend), sub-components / hooks (frontend), utilities.
 3. **Single Responsibility.** Each file, class, and function has one clear purpose. Controllers
    route, services orchestrate, repositories access data; components render, hooks hold logic,
@@ -43,7 +43,7 @@ This stack is fixed across projects by design — skills are coupled to it. Do n
 alternative for something the stack already covers without an explicit decision recorded in the
 project's Memory Bank. Full version manifest: `references/tech-stack.md`.
 
-Summary: TypeScript everywhere · React 18 + Vite (client) · NestJS 11 (server) · Prisma +
+Summary: TypeScript everywhere · React 19 + Vite (client) · NestJS 11 (server) · Prisma +
 PostgreSQL · Tailwind CSS + shadcn/Radix · Vitest/Jest/Playwright · GCP Cloud Run.
 
 ## Repository layout
@@ -54,7 +54,7 @@ Full layout, workspace wiring, and path-filtered CI: `references/repo-layout.md`
 
 ## Pre-flight (every change)
 
-- [ ] Files under 300 lines
+- [ ] Files under 350 lines
 - [ ] No hardcoded values
 - [ ] No `any`
 - [ ] Tests updated alongside the code
