@@ -1,12 +1,12 @@
 ---
 name: testing
-description: Testing standards for both client and server — frameworks, the AAA pattern, when a test is required, minimum counts, factories, and the CI gate. Use this whenever writing or updating tests, adding a service/hook/component/endpoint, fixing a bug (regression test), or setting up a project's test suite. Every code change ships with a test update; load this to know what and how to test.
+description: Testing standards for both client and server — frameworks, the AAA pattern, when a test is required, the ENFORCED 70% coverage gate, factories, and the CI gate. Use this whenever writing or updating tests, adding a service/hook/component/endpoint, fixing a bug (regression test), configuring coverage thresholds, or setting up a project's test suite. Every code change ships with a test update; no build or deploy happens below the coverage floor.
 ---
 
 # Testing Standards
 
-Tests are co-located with the code they cover and ship in the same change. Failed tests block
-deployment.
+Tests are co-located with the code they cover and ship in the same change. **Coverage below
+the floor fails the run — locally and in CI — which blocks the build and the deploy.**
 
 ## Frameworks
 | Framework | Scope |
@@ -15,24 +15,31 @@ deployment.
 | **Jest** + NestJS Testing | server unit/integration |
 | **Playwright** | end-to-end |
 
-## When a test is required
-- Every new service / hook / component / endpoint.
-- Every bug fix → a regression test that fails before the fix.
-- Every modified business logic → updated assertions.
+## Coverage gate — ENFORCED
+- **Minimum acceptable: 70%** (lines, statements, functions, branches) per package.
+- The threshold is configured **in the tool config** (`jest.config.js` coverageThreshold,
+  `vitest.config.ts` coverage.thresholds) so `npm test` itself fails below 70 — the same
+  command CI runs, so a red suite can never build or deploy.
+- 70% is the floor, not the goal — aim for the 80%+ targets in `references/coverage.md`.
+- Config snippets and per-artifact targets: `references/coverage.md`.
+
+## What kinds of tests
+- **Unit tests: mandatory** for every service, hook, component, and endpoint.
+- **Integration tests: included whenever feasible** — multi-component flows on the client,
+  controller→service→repository flows on the server. Prefer adding one per feature.
+- **Regression test for every bug fix** — it must fail before the fix.
+- E2E (Playwright) for the critical user journeys once the app has them.
 
 ## What each test file covers
 1. Happy path · 2. Error handling (API failure, validation) · 3. Edge cases (empty, boundary)
 · 4. Loading/async states · 5. Role-based behavior (where applicable).
 
 ## Pattern: Arrange–Act–Assert
-Keep tests readable and isolated; mock the layer below (repository for services, MSW for hooks).
-Examples: `references/patterns.md`.
-
-## Minimum counts & coverage
-Per-artifact minimums and coverage targets: `references/coverage.md`.
+Mock the layer directly below (repository for services, MSW for hooks/components). Examples:
+`references/patterns.md`.
 
 ## Test data
-Use factories, not inline literals, for entities. See `references/factories.md`.
+Use factories, not inline literals: `references/factories.md`.
 
 ## Organization
 ```
@@ -41,12 +48,13 @@ server/src/<module>/__tests__/<module>.{service,repository}.spec.ts
 ```
 
 ## CI gate
-Tests run on every PR (GitHub Actions); they must pass before deploy. Never merge red.
+GitHub Actions runs `npm run test:coverage` for both packages on every PR and before every
+build. **Tests failing OR coverage < 70% ⇒ no build, no deploy.** See
+infra-deploy-gcp/references/cicd.md and the workflow templates.
 
 ## Commands
 ```bash
-cd server && npm test          # Jest
-cd client && npm test          # Vitest
-cd client && npm run test:e2e  # Playwright (needs servers running)
-# coverage: npm run test:coverage in either package
+cd server && npm run test:coverage   # Jest, enforces 70% via coverageThreshold
+cd client && npm run test:coverage   # Vitest, enforces 70% via coverage.thresholds
+cd client && npm run test:e2e        # Playwright (needs servers running)
 ```

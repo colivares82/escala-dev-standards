@@ -1,0 +1,69 @@
+# Deploy to PRODUCTION — triggers ONLY on the main branch.
+# Tip: add required reviewers to the GitHub "production" environment for a manual approval gate.
+# Contract: coverage gate must pass before any build; build must succeed before deploy;
+# health check must pass or the job fails.
+name: deploy-prod
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write          # required for Workload Identity Federation (keyless)
+
+concurrency: deploy-prod    # never two dev deploys in parallel
+
+jobs:
+  test:                    # ── GATE: tests + 70% coverage. Failure stops everything.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm run test:coverage -w server
+      - run: npm run test:coverage -w client
+
+  deploy:
+    needs: test            # ← hard gate: no build/deploy unless test job is green
+    # Skips cleanly until the environment is provisioned (vars set by the provisioning
+    # runbook). Tests still run on every push; deploys auto-activate once vars exist.
+    if: ${{ vars.PROD_PROJECT_ID != '' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.PROD_WIF_PROVIDER }}
+          service_account: ${{ vars.PROD_DEPLOYER_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build + push images
+        run: |
+          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev -q
+          REG=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.PROD_PROJECT_ID }}/app
+          docker build -t $REG/server:${{ github.sha }} server
+          docker build -t $REG/client:${{ github.sha }} \
+            --build-arg VITE_API_URL=${{ vars.PROD_API_URL }} client
+          docker push $REG/server:${{ github.sha }}
+          docker push $REG/client:${{ github.sha }}
+
+      - name: Deploy to Cloud Run (dev)
+        run: |
+          REG=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.PROD_PROJECT_ID }}/app
+          gcloud run deploy backend  --image $REG/server:${{ github.sha }} \
+            --project ${{ vars.PROD_PROJECT_ID }} --region ${{ vars.GCP_REGION }} --quiet
+          gcloud run deploy frontend --image $REG/client:${{ github.sha }} \
+            --project ${{ vars.PROD_PROJECT_ID }} --region ${{ vars.GCP_REGION }} --quiet
+
+      - name: Health check (fail the deploy if unhealthy)
+        run: |
+          for i in $(seq 1 10); do
+            if curl -fsS "${{ vars.PROD_API_URL }}/api/health" | grep -q '"status":"ok"'; then
+              echo "healthy"; exit 0; fi; sleep 6; done
+          echo "::error::health check failed"; exit 1
+
+      - name: Summary
+        run: echo "### ✅ Prod deploy ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"

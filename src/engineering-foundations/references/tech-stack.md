@@ -10,7 +10,7 @@ Memory Bank records a deliberate deviation.
 - **Docker** multi-stage builds (`node:20-slim`; system Chromium where PDF generation is needed)
 
 ## Frontend (`client/`)
-- **React** 18
+- **React** 19+
 - **Vite** (dev server + build)
 - **Tailwind CSS** 4 + design tokens (scalable CSS foundation; never hand-rolled stylesheets)
 - **shadcn/ui** components on **Radix** primitives
