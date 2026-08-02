@@ -2,7 +2,7 @@
 
 # database-prisma (on-demand)
 
-Conventions for the data layer — Prisma schema modeling, enums, migrations, soft delete, and seeding. Use this whenever editing schema.prisma, creating or running migrations, writing or running seeds, modeling a new entity, or working with PostgreSQL via Prisma. Load it before changing the database in any way. Covers the destructive-operation guard rails and the deterministic-seed rules.
+Conventions for the data layer — Prisma schema modeling, enums, migrations, soft delete, and seeding. Use this whenever editing schema.prisma, creating or running migrations, writing or running seeds, modeling a new entity, or working with PostgreSQL via Prisma. Load it before changing the database in any way. Covers destructive-operation guard rails (especially in production), the production-safety rules (no resets, no deletions, no destructive migrations in prod), and the deterministic-seed rules.
 
 > Pointer only. Load the full skill on demand: `npx skills add colivares82/escala-dev-standards`
 > or read `src/database-prisma/SKILL.md` (+ references/) in the standards package when this topic is in play.

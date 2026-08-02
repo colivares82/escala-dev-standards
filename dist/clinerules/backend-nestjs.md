@@ -23,8 +23,8 @@ Request → Controller (HTTP only: routing, guards, validation)
 
 ```
 server/src/<module>/
-├── <module>.controller.ts        # HTTP layer (max 250 lines)
-├── <module>.service.ts           # business logic (max 300 lines)
+├── <module>.controller.ts        # HTTP layer (max 290 lines)
+├── <module>.service.ts           # business logic (max 350 lines)
 ├── <module>.module.ts            # DI registration (~30 lines)
 ├── dto/
 │   ├── index.ts                  # barrel export
@@ -32,8 +32,8 @@ server/src/<module>/
 │   ├── update-<entity>.dto.ts
 │   └── <entity>-filter.dto.ts
 ├── repositories/
-│   └── <module>.repository.ts    # ALL Prisma (max 200 lines)
-├── services/                     # sub-services when service > 300 lines
+│   └── <module>.repository.ts    # ALL Prisma (max 235 lines)
+├── services/                     # sub-services when service > 350 lines
 │   └── <domain>.service.ts
 └── __tests__/
     ├── <module>.service.spec.ts
@@ -81,12 +81,12 @@ never string literals.
 | Business logic in controllers | Business logic in services |
 | `any` request params | Typed DTOs |
 | String literals for roles | `UserRole` enum |
-| God services (300+ lines) | Extract sub-services + repositories |
+| God services (350+ lines) | Extract sub-services + repositories |
 | `console.log` | NestJS `Logger` |
 | Skip tests for "simple" changes | Test every change |
 
 ## Pre-commit
-- [ ] Files < 300 lines · no Prisma outside repositories · no business logic in controllers
+- [ ] Files ≤ 350 lines target (hard cap 385 = +10%); controller ≤ 290, service ≤ 350, repository ≤ 235 · no Prisma outside repositories · no business logic in controllers
 - [ ] All inputs DTO-validated · RBAC guards in place · no `any` · no hardcoded values
 - [ ] Tests updated · `npm run build` passes · `npm test` passes
 
