@@ -4,9 +4,6 @@ Portable engineering standards and skills, extracted from the MAGUPELL project a
 generalized for reuse across all future projects. Stack-coupled by design — these assume
 the fixed Escala stack and bake it in rather than staying framework-agnostic.
 
-> **Status**: Taxonomy locked (8 skills). Authoring not yet started.
-> First build target: `engineering-foundations`, end-to-end in both formats.
-
 ---
 
 ## 1. Why this exists
@@ -37,11 +34,14 @@ escala-dev-standards/
 └── .github/workflows/verify-build.yml
 ```
 
-- **Always-on**: consuming projects add this repo as an npm devDependency and run
-  `escala-standards-sync` (see GUIDE.md) — generated rules land in `.clinerules/`, which
-  Cline auto-loads every session. Hand-written project rules are never touched.
-- **On-demand**: `npx skills add colivares82/escala-dev-standards` — the skills CLI installs
-  the `src/` SKILL.md tree, pulled by description match when relevant.
+- **One command, both channels**: consuming projects add this repo as an npm devDependency;
+  `escala-standards-sync` (wired to `postinstall`) copies generated rules into
+  `.clinerules/` (always-on, Cline auto-loads) AND the `src/` skills into
+  `.cline/skills/<skill>/` (on-demand, Cline auto-detects). Fully self-contained — updating
+  the dependency + reinstalling updates both. Hand-written rules and third-party skills are
+  marker-guarded and never touched.
+- The skills CLI (`npx skills add ...`) is only needed for **third-party** skills
+  (Grill Me, etc.), which install into the same `.cline/skills/` folder.
 
 One source of truth (`src/`); `dist/` is a build artifact enforced fresh by CI.
 
@@ -203,5 +203,5 @@ their layer).
 6. `infra-deploy-gcp`
 7. `battle-tested-patterns`
 
-Each skill, once authored in `src/`, is emitted to `dist/clinerules/` and `dist/skills/`,
-and can be packaged into an installable `.skill` file.
+Each skill lives in `src/` (the canonical SKILL.md tree) and is emitted to
+`dist/clinerules/` by `npm run build`; CI keeps `dist/` from ever going stale.

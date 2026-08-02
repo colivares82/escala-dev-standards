@@ -2,7 +2,7 @@
 
 # infra-deploy-gcp (on-demand)
 
-Infrastructure, CI/CD, and deployment standards on Google Cloud Platform (Cloud Run + Cloud SQL + Cloud Storage) with GitHub Actions. Use this whenever writing or editing deploy scripts, CI workflows, Dockerfiles, CORS/secrets config, GCP setup, or planning a release — and when tuning cost/performance. Enforces the /infrastructure folder discipline, keyless Workload Identity Federation, env-driven config, and efficient Cloud Run/GCS configuration. Load before any DevOps work.
+Infrastructure, CI/CD, and deployment standards on Google Cloud Platform (Cloud Run + Cloud SQL + Cloud Storage) with GitHub Actions — including the ON-DEMAND cloud provisioning runbook. Use this when the user asks to set up / provision the cloud for a project, and when writing or editing deploy scripts, CI workflows, Dockerfiles, CORS/secrets config, or planning a release. Enforces: main→Production, dev→Development; no build without the 70% coverage gate passing; fully independent dev/prod environments; provisioning is interactive (grill-me intake, credentials entered live into Secret Manager) and never blocks development or GitHub pushes.
 
 > Pointer only. Load the full skill on demand: `npx skills add colivares82/escala-dev-standards`
 > or read `src/infra-deploy-gcp/SKILL.md` (+ references/) in the standards package when this topic is in play.

@@ -1,0 +1,21 @@
+# PR checks — runs on every pull request. Required by branch protection on dev and main.
+# Tests + the 70% coverage gate. No deploy here.
+name: pr-checks
+on:
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      # Coverage gate: thresholds live in jest.config.js / vitest.config.ts (70%),
+      # so these commands FAIL below the floor — that failure blocks the merge.
+      - name: Server tests + coverage gate
+        run: npm run test:coverage -w server
+      - name: Client tests + coverage gate
+        run: npm run test:coverage -w client

@@ -13,10 +13,10 @@ escala-dev-standards (GitHub, versioned)   ← single source of truth you own
         │  npm i -D github:...#vX.Y.Z
         ▼
 <project>/node_modules/escala-dev-standards
-        │  npx escala-standards-sync   (automated via postinstall)
+        │  npx escala-standards-sync   (automated via postinstall — ONE command, BOTH channels)
         ▼
-<project>/.clinerules/*.md   → Cline auto-loads every session (always-on rules)
-<project> skills             → npx skills add colivares82/escala-dev-standards (on-demand)
+<project>/.clinerules/*.md          → always-on rules (Cline auto-loads every session)
+<project>/.cline/skills/<skill>/    → on-demand skills (Cline auto-detects, loads when triggered)
 ```
 
 - **You edit only this repo.** Projects consume a pinned version; updating = bump + sync.
@@ -56,10 +56,11 @@ Then in the project's `package.json`:
     "standards:sync": "escala-standards-sync",
     "postinstall": "escala-standards-sync"        // ← automation: every npm install re-syncs
   },
-  // optional — omit to sync ALL rules:
+  // optional — omit to sync ALL rules and ALL skills:
   "escalaStandards": {
-    "rules": ["engineering-foundations", "agentic-workflow", "backend-nestjs",
-              "frontend-react", "testing"]
+    "rules":  ["engineering-foundations", "agentic-workflow", "backend-nestjs",
+               "frontend-react", "testing"],
+    "skills": ["battle-tested-patterns", "infra-deploy-gcp", "database-prisma"]
   }
 }
 ```
@@ -67,14 +68,20 @@ Then in the project's `package.json`:
 Run it once: `npm run standards:sync`. Commit the resulting `.clinerules/*.md` so the project
 is self-contained and reviewable.
 
-**On-demand skills** (full SKILL.md + references, loaded when relevant):
+That single sync delivers **both channels**: the 8 always-on rules into `.clinerules/` and
+the 8 on-demand skills (full SKILL.md + references) into `.cline/skills/`, where Cline
+auto-detects them. Everything ships inside this dependency — no external tool required.
+Commit both folders so the project is self-contained.
+
+**Third-party skills** (Grill Me, etc.) are the only thing installed separately, with the
+skills CLI, into the same folder:
 
 ```bash
-npx skills add colivares82/escala-dev-standards
+npx skills add mattpocock/skills      # Grill Me & co. → alongside yours in .cline/skills/
 ```
 
-The skills CLI reads the `src/<skill>/SKILL.md` tree directly — same command as any
-third-party skill (e.g. `npx skills add mattpocock/skills` for Grill Me).
+The sync never touches skill directories it didn't create (marker-guarded), so your skills
+and third-party skills coexist safely.
 
 ---
 
@@ -103,9 +110,8 @@ git rm .clinerules/Backend-Development-Standards.md \
        .clinerules/Frontend-Development-Standards.md \
        .clinerules/Infrastructure-Standards.md \
        .clinerules/EveryNewTask.md .clinerules/MemoryBank.md
-npm run standards:sync          # generated rules land in .clinerules/
-npx skills add colivares82/escala-dev-standards
-git add -A && git commit -m "Adopt escala-dev-standards v1.0.0 as always-on rules"
+npm run standards:sync          # rules → .clinerules/  +  skills → .cline/skills/
+git add -A && git commit -m "Adopt escala-dev-standards v1.0.0 (rules + skills)"
 ```
 
 Magupell's `memory-bank/`, `docs/`, and specs stay exactly as they are — the skills describe
@@ -118,9 +124,9 @@ the same patterns the project already follows, so no code changes are required.
 1. Scaffold the monorepo per `engineering-foundations/references/repo-layout.md`
    (`client/` · `server/` · `shared/`).
 2. `npm i -D github:colivares82/escala-dev-standards#v1.0.0` + the `postinstall` script above.
-3. `npm run standards:sync` → all 8 rules land in `.clinerules/`.
-4. `npx skills add colivares82/escala-dev-standards` (+ third-party: `mattpocock/skills`,
-   `obra/superpowers`, `shadcn/ui`).
+3. `npm run standards:sync` → 8 rules in `.clinerules/` + 8 skills in `.cline/skills/`.
+4. Optional third-party skills: `npx skills add mattpocock/skills` / `obra/superpowers` /
+   `shadcn/ui` — they land alongside yours in `.cline/skills/`.
 5. Create `memory-bank/` from `src/agentic-workflow/references/memory-bank-templates/`.
 6. First Cline session: it reads `.clinerules` automatically + the Memory Bank per the
    agentic-workflow rule.
